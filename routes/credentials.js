@@ -6,35 +6,36 @@ import { composeCredential } from '../templates/OB3.js';
 const keyv = new Keyv();
 
 import { getConfig } from "../config.js";
-const { host, port, protocol, lcpHost, lcpPort, lcpProtocol  } = getConfig();
+
+const { isDev, port, lcpHost } = getConfig();
 
 var router = express.Router();
 const expiry = 1000 * 60 * 10; // store data expires after ten minutes
 
 router.post('/handle', function(req, res, next) {
+    const devPort = isDev?`:${port}`:''
+    const lciHost = `${req.protocol}://${req.hostname}${devPort}`
     const creds = []
     const credentialData = req.body
-    console.log('credential Data passed in to handle:')
-    console.log(credentialData)
     const uuidForList = crypto.randomUUID();
     credentialData.forEach(cred=>{
         const uuidForCredential = crypto.randomUUID();
         const challenge = crypto.randomUUID()
         cred.id = uuidForCredential
-        cred.collectionEndpoint = `${protocol}://${host}:${port}/credentials/${uuidForList}/${uuidForCredential}`;
+        cred.collectionEndpoint = `${lciHost}/credentials/${uuidForList}/${uuidForCredential}`;
         cred.challenge = challenge;
         if (cred.type === 'degree') {
-            cred.pdfLink = '${protocol}://${host}:${port}/credentials/pdf/${uuidForList}/${uuidForCredential}'
+            cred.pdfLink = `${lciHost}/credentials/pdf/${uuidForList}/${uuidForCredential}`
         }
         cred.deepLink = `dccrequest://request?issuer=me&vc_request_url=${cred.collectionEndpoint}&challenge=${challenge}&auth_type=bearer`
         creds.push(cred)
     })
     
     keyv.set(uuidForList, creds, expiry)
-    res.json({redirectTo: `${lcpProtocol}://${lcpHost}:${lcpPort}/learner-credential-portal/credentials?list=${protocol}://${host}:${port}/credentials/${uuidForList}`})
+    res.json({redirectTo: `${lcpHost}/learner-credential-portal/credentials?list=${lciHost}/credentials/${uuidForList}`})
    
     // Could potentially also redirect directly from here, like so:
-   // res.redirect(`${lcpProtocol}://${lcpHost}:${lcpPort}/learner-credential-portal/credentials?list=${protocol}://${host}:${port}/credentials/${uuidForList}`)
+   // res.redirect(`${lcpHost}/learner-credential-portal/credentials?list=${lciHost}/credentials/${uuidForList}`})
    
 });
 
@@ -54,6 +55,7 @@ router.post('/:listid/:credid', async function(req, res, next) {
     const credentialRecord = credList.find(cred => cred.id === credid)
     const isDiDAuthValid = await verifyDIDAuth(didAuthResponse, credentialRecord.challenge)
 
+        // TODO enable the following if at some point.
     // if (isDiDAuthValid) {} else {}
     const unsignedVC = composeCredential(holderDID, credentialRecord)
     if (credentialRecord.test) {

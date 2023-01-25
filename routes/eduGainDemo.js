@@ -1,9 +1,8 @@
 import express from 'express';
 import axios from 'axios';
 import { getConfig } from "../config.js";
-const { host, port, protocol, lcpHost, lcpPort, lcpProtocol  } = getConfig();
-const lciServer = `${protocol}://${host}:${port}`
-const lciHandleEndpoint = `${lciServer}/credentials/handle`
+
+const { isDev, port } = getConfig();
 
 import demoData from "../demoData/index.js"
 
@@ -24,17 +23,19 @@ has to implement to use the LCI and LCP with eduGain.
 */
 
 router.get('/:studentID', async function(req, res, next) {
+    const devPort = isDev?`:${port}`:''
+    const lciHandleEndpoint = `${req.protocol}://${req.hostname}${devPort}/credentials/handle`
+    console.log("the lci handle endpoint:")
+    console.log(lciHandleEndpoint)
   // would also veify the SAML token coming in on the request.
     const studentID = req.params.studentID
     // this next call 'demoData' right now just gets preset demo data from a file,
     // but in production would call the issuer's method or endpoint as set in the
     // .env file.
     const dataFromIssuer = demoData[studentID]
-    console.log(dataFromIssuer)
     axios.post(lciHandleEndpoint, dataFromIssuer)
       .then(function (response) {
         const redirectURI=response.data.redirectTo
-        console.log(redirectURI);
         res.redirect(redirectURI)
       })
       .catch(function (error) {
