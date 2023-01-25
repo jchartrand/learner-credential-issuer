@@ -10,4 +10,7 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Learner Credential Issuer' });
 });
 
+router.get('/healthz', function(req, res, next) {
+  res.sendStatus(200);
+});
 export default router
