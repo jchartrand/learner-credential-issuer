@@ -14,7 +14,7 @@ const expiry = 1000 * 60 * 10; // store data expires after ten minutes
 
 router.post('/handle', function(req, res, next) {
     const devPort = isDev?`:${port}`:''
-    const lciHost = `${req.protocol}://${req.hostname}${devPort}`
+    const lciHost = `https://${req.hostname}${devPort}`
     const creds = []
     const credentialData = req.body
     const uuidForList = crypto.randomUUID();

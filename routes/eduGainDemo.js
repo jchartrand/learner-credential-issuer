@@ -24,7 +24,7 @@ has to implement to use the LCI and LCP with eduGain.
 
 router.get('/:studentID', async function(req, res, next) {
     const devPort = isDev?`:${port}`:''
-    const lciHandleEndpoint = `${req.protocol}://${req.hostname}${devPort}/credentials/handle`
+    const lciHandleEndpoint = `https://${req.hostname}${devPort}/credentials/handle`
     console.log("the lci handle endpoint:")
     console.log(lciHandleEndpoint)
   // would also veify the SAML token coming in on the request.
