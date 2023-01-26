@@ -32,10 +32,10 @@ router.post('/handle', function(req, res, next) {
     })
     
     keyv.set(uuidForList, creds, expiry)
-    res.json({redirectTo: `${lcpHost}/learner-credential-portal/credentials?list=${lciHost}/credentials/${uuidForList}`})
+    res.json({redirectTo: `${lcpHost}/credentials?list=${lciHost}/credentials/${uuidForList}`})
    
     // Could potentially also redirect directly from here, like so:
-   // res.redirect(`${lcpHost}/learner-credential-portal/credentials?list=${lciHost}/credentials/${uuidForList}`})
+   // res.redirect(`${lcpHost}/credentials?list=${lciHost}/credentials/${uuidForList}`})
    
 });
 
